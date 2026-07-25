@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ternary Solvent Designer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .container { min-height: 100vh; padding: 24px; }
+    .max-w-7xl { max-width: 88rem; margin: 0 auto; }
+    .space-y-6 { display: flex; flex-direction: column; gap: 24px; }
+    .header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .logo { height: 40px; object-fit: contain; }
+    .header-content h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+    .header-content p { margin-top: 4px; font-size: 14px; color: #64748b; }
+    .btn-group, .btn-group-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
+    .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); overflow: hidden; }
+    .card-header { padding: 20px; border-bottom: 1px solid #e2e8f0; }
+    .card-header h2 { font-size: 18px; font-weight: 600; }
+    .card-content { padding: 20px; }
+    .grid-2col { display: grid; gap: 24px; grid-template-columns: 1.35fr 0.95fr; }
+    @media (max-width: 1100px) { .grid-2col { grid-template-columns: 1fr; } }
+    .svg-container { border-radius: 16px; border: 1px solid #e2e8f0; background: white; padding: 12px; }
+    svg { display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; user-select: none; }
+    .btn {
+      padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f1f5f9;
+      color: #0f172a; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { background: #e2e8f0; border-color: #94a3b8; }
+    .btn.primary { background: #0f172a; color: white; border-color: #0f172a; }
+    .btn.primary:hover { background: #1e293b; }
+    .tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px; overflow-x: auto; }
+    .tab-btn {
+      padding: 12px 16px; border: none; background: none; cursor: pointer; font-size: 14px; font-weight: 500;
+      color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap;
+    }
+    .tab-btn.active { color: #0f172a; border-bottom-color: #0f172a; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    label { font-size: 14px; font-weight: 500; color: #0f172a; }
+    input, select {
+      padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: border-color 0.2s;
+      font-family: inherit; background: white; color: #0f172a;
+    }
+    input:focus, select:focus { outline: none; border-color: #0f172a; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1); }
+    .info-box { padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 14px; line-height: 1.5; }
+    .info-success { background: #f0fdf4; border-color: #86efac; color: #166534; }
+    .info-error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .info-neutral { background: #f8fafc; border-color: #cbd5e1; color: #475569; }
+    .constraint-group { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+    .constraint-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .separator { height: 1px; background: #e2e8f0; margin: 16px 0; }
+    .table-wrapper { border: 1px solid #e2e8f0; border-radius: 12px; overflow: auto; max-height: 360px; margin-bottom: 16px; }
+    .table-input { width: 100%; min-width: 90px; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: white; }
+    .table-input:focus { outline: none; border-color: #0f172a; box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead { position: sticky; top: 0; background: #f8fafc; }
+    th { padding: 12px; text-align: left; font-weight: 500; border-bottom: 1px solid #e2e8f0; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:last-child td { border-bottom: none; }
+    .text-muted { color: #64748b; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+    .kbd { display: inline-block; padding: 2px 6px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; color: #475569; }
+    .checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
+    .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; margin: 0; padding: 0; border-radius: 4px; box-shadow: none; }
+    .checkbox-row label { margin: 0; cursor: pointer; }
+    .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; }
+    .swatch { width: 12px; height: 12px; border-radius: 999px; display: inline-block; }
+    .small { font-size: 12px; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const SQRT3 = Math.sqrt(3);
+      const W = 700;
+      const MARGIN = 70;
+      const SIDE = W - 2 * MARGIN;
+      const TRI_H = SIDE * SQRT3 / 2;
+      const H = TRI_H + 2 * MARGIN + 40;
+      const P1 = { x: W / 2, y: MARGIN };
+      const P2 = { x: W / 2 - SIDE / 2, y: MARGIN + TRI_H };
+      const P3 = { x: W / 2 + SIDE / 2, y: MARGIN + TRI_H };
+      const SOLVENT_COLORS = { a: '#22c55e', b: '#ef4444', c: '#3b82f6' };
+      const EDGE_COLOR = '#111827';
+      const AXIS_OFFSETS = { a: { x: -22, y: 0 }, b: { x: -14, y: 20 }, c: { x: 16, y: 4 } };
+      const POINT_COLORS = ['#0f172a', '#7c3aed', '#ea580c', '#0891b2', '#be123c', '#4d7c0f'];
+      const COLOR_SCHEMES = {
+        blueRed: { label: 'Blue → Red', stops: [
+          { r: 0x3b, g: 0x82, b: 0xf6 },
+          { r: 0xef, g: 0x44, b: 0x44 }
+        ] },
+        greenYellowRed: { label: 'Green → Yellow → Red', stops: [
+          { r: 0x22, g: 0xc5, b: 0x5e },
+          { r: 0xea, g: 0xb3, b: 0x08 },
+          { r: 0xef, g: 0x44, b: 0x44 }
+        ] },
+        viridis: { label: 'Viridis (purple → teal → yellow)', stops: [
+          { r: 0x44, g: 0x01, b: 0x54 },
+          { r: 0x3b, g: 0x52, b: 0x8b },
+          { r: 0x21, g: 0x90, b: 0x8c },
+          { r: 0x5d, g: 0xc9, b: 0x63 },
+          { r: 0xfd, g: 0xe7, b: 0x25 }
+        ] }
+      };
+      const SNAP_STEP = 10;
+      const HEATMAP_RADIUS = SNAP_STEP;
+      const ZBT_LOGO_SRC = 'zbt-logo.png';
+      const INFO_BOX_DEFAULT_POS = { x: 20, y: 20 };
+      const LEGEND_SIZES = {
+        horizontal: { w: 280, h: 54 },
+        vertical: { w: 160, h: 210 }
+      };
+      const LEGEND_DEFAULT_POS = { x: W / 2 - LEGEND_SIZES.horizontal.w / 2, y: P2.y + 42 };
+
+      const state = {
+        names: { a: 'Solvent 1', b: 'Solvent 2', c: 'Solvent 3' },
+        comp: { a: 33.33, b: 33.33, c: 33.34 },
+        inputs: { a: '33.33', b: '33.33', c: '33.34' },
+        history: [],
+        nextDispersionNr: 1,
+        dragging: false,
+        infoBoxPos: { ...INFO_BOX_DEFAULT_POS },
+        draggingInfoBox: false,
+        infoBoxDragOffset: { x: 0, y: 0 },
+        infoBoxOrientation: 'vertical',
+        legendPos: { ...LEGEND_DEFAULT_POS },
+        draggingLegend: false,
+        legendDragOffset: { x: 0, y: 0 },
+        legendOrientation: 'horizontal',
+        activeTab: 'composition',
+        bounds: { aMin: 0, aMax: 100, bMin: 0, bMax: 100, cMin: 0, cMax: 100 },
+        snapToGrid: true,
+        showSavedPoints: true,
+        showCurrentPoint: true,
+        importStatus: null,
+        importReplace: false,
+        propertyColumns: [],
+        nextPropertyId: 1,
+        nextPropertyOrdinal: 1,
+        activePropertyId: null,
+        heatmapEnabled: false,
+        colorPointsByProperty: true,
+        colorScheme: 'blueRed',
+        heatmapAuto: true,
+        heatmapMin: 0,
+        heatmapMax: 100,
+        heatmapRadius: HEATMAP_RADIUS
+      };
+
+      function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+      function round2(v) { return Math.round(v * 100) / 100; }
+      function fmt(v) { return Number.isFinite(v) ? round2(v).toFixed(2) : '0.00'; }
+      function fmtAxis(v) { return (v / 100).toFixed(1); }
+      function esc(s) {
+        return String(s)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;');
+      }
+      function ternaryToCartesian(a, b, c) {
+        const sum = a + b + c || 1;
+        const an = a / sum;
+        const bn = b / sum;
+        const cn = c / sum;
+        return { x: an * P1.x + bn * P2.x + cn * P3.x, y: an * P1.y + bn * P2.y + cn * P3.y };
+      }
+      function barycentricFromPoint(x, y) {
+        const denom = (P2.y - P3.y) * (P1.x - P3.x) + (P3.x - P2.x) * (P1.y - P3.y);
+        const a = ((P2.y - P3.y) * (x - P3.x) + (P3.x - P2.x) * (y - P3.y)) / denom;
+        const b = ((P3.y - P1.y) * (x - P3.x) + (P1.x - P3.x) * (y - P3.y)) / denom;
+        const c = 1 - a - b;
+        return { a, b, c };
+      }
+      function projectToTriangle(x, y) {
+        let { a, b, c } = barycentricFromPoint(x, y);
+        a = Math.max(0, a);
+        b = Math.max(0, b);
+        c = Math.max(0, c);
+        const s = a + b + c || 1;
+        return { a: (a / s) * 100, b: (b / s) * 100, c: (c / s) * 100 };
+      }
+      function normalizeTriple(a, b, c) {
+        const aa = Math.max(0, Number(a) || 0);
+        const bb = Math.max(0, Number(b) || 0);
+        const cc = Math.max(0, Number(c) || 0);
+        const sum = aa + bb + cc;
+        if (sum === 0) return { a: 33.33, b: 33.33, c: 33.34 };
+        return { a: (aa / sum) * 100, b: (bb / sum) * 100, c: (cc / sum) * 100 };
+      }
+      function snapComposition(comp, step) {
+        const units = Math.round(100 / step);
+        const raw = { a: comp.a / step, b: comp.b / step, c: comp.c / step };
+        const floors = { a: Math.floor(raw.a), b: Math.floor(raw.b), c: Math.floor(raw.c) };
+        let remaining = units - (floors.a + floors.b + floors.c);
+        const order = [
+          { key: 'a', frac: raw.a - floors.a },
+          { key: 'b', frac: raw.b - floors.b },
+          { key: 'c', frac: raw.c - floors.c }
+        ].sort((u, v) => v.frac - u.frac);
+        const snapped = { ...floors };
+        let idx = 0;
+        while (remaining > 0) {
+          snapped[order[idx % order.length].key] += 1;
+          remaining -= 1;
+          idx += 1;
+        }
+        return { a: snapped.a * step, b: snapped.b * step, c: snapped.c * step };
+      }
+      function insideConstraints(comp, bounds) {
+        return comp.a >= bounds.aMin && comp.a <= bounds.aMax && comp.b >= bounds.bMin && comp.b <= bounds.bMax && comp.c >= bounds.cMin && comp.c <= bounds.cMax;
+      }
+      function constraintsFeasible(bounds) {
+        return bounds.aMin <= bounds.aMax && bounds.bMin <= bounds.bMax && bounds.cMin <= bounds.cMax && bounds.aMin + bounds.bMin + bounds.cMin <= 100 && bounds.aMax + bounds.bMax + bounds.cMax >= 100;
+      }
+      function polygonPath(points) {
+        if (!points.length) return '';
+        return 'M ' + points[0].x + ' ' + points[0].y + ' ' + points.slice(1).map((p) => 'L ' + p.x + ' ' + p.y).join(' ') + ' Z';
+      }
+      function sortPolygon(points) {
+        if (points.length <= 2) return points;
+        const cx = points.reduce((s, p) => s + p.x, 0) / points.length;
+        const cy = points.reduce((s, p) => s + p.y, 0) / points.length;
+        return [...points].sort((p1, p2) => Math.atan2(p1.y - cy, p1.x - cx) - Math.atan2(p2.y - cy, p2.x - cx));
+      }
+      function clipPolygonHalfPlane(poly, inside, intersect) {
+        if (!poly.length) return [];
+        const out = [];
+        for (let i = 0; i < poly.length; i += 1) {
+          const curr = poly[i];
+          const prev = poly[(i + poly.length - 1) % poly.length];
+          const currIn = inside(curr);
+          const prevIn = inside(prev);
+          if (currIn) {
+            if (!prevIn) out.push(intersect(prev, curr));
+            out.push(curr);
+          } else if (prevIn) {
+            out.push(intersect(prev, curr));
+          }
+        }
+        return out;
+      }
+      function edgePoint(p, q, t) { return { x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t }; }
+      function clipByComponent(poly, key, op, thresholdPct) {
+        const threshold = thresholdPct / 100;
+        const valueAt = (pt) => barycentricFromPoint(pt.x, pt.y)[key];
+        const inside = (pt) => {
+          const v = valueAt(pt);
+          return op === '>=' ? v >= threshold - 1e-9 : v <= threshold + 1e-9;
+        };
+        const intersect = (p, q) => {
+          const vp = valueAt(p);
+          const vq = valueAt(q);
+          const denom = vq - vp;
+          if (Math.abs(denom) < 1e-12) return p;
+          return edgePoint(p, q, clamp((threshold - vp) / denom, 0, 1));
+        };
+        return clipPolygonHalfPlane(poly, inside, intersect);
+      }
+      function allowedPolygon(bounds) {
+        if (!constraintsFeasible(bounds)) return [];
+        let poly = [P1, P2, P3];
+        poly = clipByComponent(poly, 'a', '>=', bounds.aMin);
+        poly = clipByComponent(poly, 'a', '<=', bounds.aMax);
+        poly = clipByComponent(poly, 'b', '>=', bounds.bMin);
+        poly = clipByComponent(poly, 'b', '<=', bounds.bMax);
+        poly = clipByComponent(poly, 'c', '>=', bounds.cMin);
+        poly = clipByComponent(poly, 'c', '<=', bounds.cMax);
+        return sortPolygon(poly);
+      }
+      function polygonForConstraint(key, op, thresholdPct) {
+        let poly = [P1, P2, P3];
+        poly = clipByComponent(poly, key, op, thresholdPct);
+        return sortPolygon(poly);
+      }
+      function toSvgDataUri(svg) { return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }
+      function download(filename, blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+      function buildCsv(rows, names, propertyColumns = []) {
+        const header = ['Dispersion Nr.', names.a, names.b, names.c, 'Valid', ...propertyColumns.map((col) => col.name), 'Timestamp'];
+        const lines = [header.join(',')];
+        rows.forEach((r) => {
+          lines.push([
+            '"' + String(r.dispersionNr ?? '').replaceAll('"', '""') + '"',
+            Number(r.a).toFixed(2),
+            Number(r.b).toFixed(2),
+            Number(r.c).toFixed(2),
+            r.valid ? 'Yes' : 'No',
+            ...propertyColumns.map((col) => '"' + String((r.properties && r.properties[col.id]) ?? '').replaceAll('"', '""') + '"'),
+            '"' + String(r.timestamp ?? '').replaceAll('"', '""') + '"'
+          ].join(','));
+        });
+        return lines.join('\n');
+      }
+      function buildWorkbookXml(rows, names, propertyColumns = []) {
+        const strCell = (value) => ({ value: value, number: false });
+        const numCell = (value) => ({ value: value, number: true });
+        const propertyCell = (r, col) => {
+          const raw = (r.properties && r.properties[col.id]) ?? '';
+          const num = Number(raw);
+          return String(raw).trim() !== '' && Number.isFinite(num) ? numCell(num) : strCell('');
+        };
+        const headerRow = ['Dispersion Nr.', names.a, names.b, names.c, 'Valid', ...propertyColumns.map((col) => col.name), 'Timestamp'].map(strCell);
+        const dataRows = rows.map((r) => [
+          strCell(r.dispersionNr ?? ''),
+          numCell(fmt(r.a)),
+          numCell(fmt(r.b)),
+          numCell(fmt(r.c)),
+          strCell(r.valid ? 'Yes' : 'No'),
+          ...propertyColumns.map((col) => propertyCell(r, col)),
+          strCell(r.timestamp ?? '')
+        ]);
+        const rowXml = [headerRow, ...dataRows].map((row) => '<Row>' + row.map((cell) => '<Cell><Data ss:Type="' + (cell.number ? 'Number' : 'String') + '">' + esc(cell.value) + '</Data></Cell>').join('') + '</Row>').join('');
+        return '<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Compositions"><Table>' + rowXml + '</Table></Worksheet></Workbook>';
+      }
+      function parseCsvLine(line) {
+        const fields = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i += 1) {
+          const ch = line[i];
+          if (inQuotes) {
+            if (ch === '"') {
+              if (line[i + 1] === '"') { cur += '"'; i += 1; } else { inQuotes = false; }
+            } else {
+              cur += ch;
+            }
+          } else if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === ',') {
+            fields.push(cur);
+            cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        fields.push(cur);
+        return fields;
+      }
+      function parseImportedCsv(text) {
+        const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+        if (lines.length < 2) return null;
+        const header = parseCsvLine(lines[0]);
+        if (header.length < 6) return null;
+        const names = { a: header[1], b: header[2], c: header[3] };
+        const propertyNames = header.slice(5, header.length - 1);
+        const rows = lines.slice(1).map((line) => {
+          const fields = parseCsvLine(line);
+          if (fields.length < 6) return null;
+          const a = Number(fields[1]);
+          const b = Number(fields[2]);
+          const c = Number(fields[3]);
+          if (!Number.isFinite(a) || !Number.isFinite(b) || !Number.isFinite(c)) return null;
+          const propertiesByName = {};
+          propertyNames.forEach((name, idx) => { propertiesByName[name] = fields[5 + idx]; });
+          return { dispersionNr: fields[0] || '', a, b, c, timestamp: fields[fields.length - 1] || '', propertiesByName };
+        }).filter(Boolean);
+        if (!rows.length) return null;
+        return { names, propertyNames, rows };
+      }
+      function activePropertyValues() {
+        if (!state.activePropertyId) return [];
+        return state.history
+          .map((row) => ({ a: row.a, b: row.b, c: row.c, v: Number(row.properties && row.properties[state.activePropertyId]) }))
+          .filter((p) => Number.isFinite(p.v));
+      }
+      function idwValue(a, b, c, points, radius = HEATMAP_RADIUS) {
+        if (!points.length) return null;
+        let num = 0;
+        let den = 0;
+        for (const p of points) {
+          const d2 = (a - p.a) ** 2 + (b - p.b) ** 2 + (c - p.c) ** 2;
+          if (d2 < 1e-6) return p.v;
+          const d = Math.sqrt(d2);
+          if (d >= radius) continue;
+          const w = (1 - d / radius) ** 2;
+          num += w * p.v;
+          den += w;
+        }
+        return den > 0 ? num / den : null;
+      }
+      function heatColor(t, scheme = 'blueRed') {
+        const clamped = clamp(t, 0, 1);
+        const stops = (COLOR_SCHEMES[scheme] || COLOR_SCHEMES.blueRed).stops;
+        const segments = stops.length - 1;
+        const scaled = clamped * segments;
+        const idx = Math.min(Math.floor(scaled), segments - 1);
+        const localT = scaled - idx;
+        const lo = stops[idx];
+        const hi = stops[idx + 1];
+        return {
+          r: Math.round(lo.r + (hi.r - lo.r) * localT),
+          g: Math.round(lo.g + (hi.g - lo.g) * localT),
+          b: Math.round(lo.b + (hi.b - lo.b) * localT)
+        };
+      }
+      function svgGradientStops(scheme) {
+        const stops = (COLOR_SCHEMES[scheme] || COLOR_SCHEMES.blueRed).stops;
+        return stops.map((s, i) => '<stop offset="' + ((i / (stops.length - 1)) * 100) + '%" stop-color="rgb(' + s.r + ',' + s.g + ',' + s.b + ')" />').join('');
+      }
+      function runSelfTests() {
+        const n = normalizeTriple(20, 30, 50);
+        console.assert(Math.abs(n.a + n.b + n.c - 100) < 1e-9, 'normalizeTriple should sum to 100');
+        const s = snapComposition({ a: 21, b: 29, c: 50 }, 10);
+        console.assert(s.a + s.b + s.c === 100, 'snapComposition should preserve total');
+        const p = ternaryToCartesian(100, 0, 0);
+        console.assert(Math.abs(p.x - P1.x) < 1e-9 && Math.abs(p.y - P1.y) < 1e-9, 'ternaryToCartesian vertex mapping failed');
+        console.assert(buildCsv([{ dispersionNr: '1', timestamp: 't', a: 20, b: 30, c: 50, valid: true }], state.names).includes('Dispersion Nr.'), 'CSV header missing');
+        const exactPoints = [{ a: 20, b: 30, c: 50, v: 42 }];
+        console.assert(idwValue(20, 30, 50, exactPoints) === 42, 'idwValue should return exact value at a data point');
+        const nearPoints = [{ a: 0, b: 0, c: 0, v: 0 }, { a: 10, b: 0, c: 0, v: 10 }];
+        console.assert(Math.abs(idwValue(5, 0, 0, nearPoints) - 5) < 1e-9, 'idwValue should average two equidistant points within radius');
+        console.assert(idwValue(50, 0, 0, [{ a: 0, b: 0, c: 0, v: 99 }]) === null, 'idwValue should return null when no points are within the influence radius');
+        const viridisStart = heatColor(0, 'viridis');
+        console.assert(viridisStart.r === 0x44 && viridisStart.g === 0x01 && viridisStart.b === 0x54, 'heatColor should start viridis at its first stop');
+        const greenYellowRedEnd = heatColor(1, 'greenYellowRed');
+        console.assert(greenYellowRedEnd.r === 0xef && greenYellowRedEnd.g === 0x44 && greenYellowRedEnd.b === 0x44, 'heatColor should end greenYellowRed at red');
+        console.assert(heatColor(2, 'unknownScheme').r === heatColor(1, 'blueRed').r, 'heatColor should fall back to blueRed for an unknown scheme');
+        const csvFields = parseCsvLine('"1","a,b","c""d",20.00');
+        console.assert(csvFields.length === 4 && csvFields[1] === 'a,b' && csvFields[2] === 'c"d' && csvFields[3] === '20.00', 'parseCsvLine should handle quoted commas and escaped quotes');
+      }
+
+      function updateInputsFromComp() {
+        state.inputs = { a: fmt(state.comp.a), b: fmt(state.comp.b), c: fmt(state.comp.c) };
+      }
+      function commitComposition() {
+        const normalized = normalizeTriple(state.inputs.a, state.inputs.b, state.inputs.c);
+        state.comp = state.snapToGrid ? snapComposition(normalized, SNAP_STEP) : normalized;
+        updateInputsFromComp();
+        render();
+      }
+      function clientToSvgPoint(clientX, clientY) {
+        const svg = document.getElementById('ternary-svg');
+        if (!svg) return null;
+        const rect = svg.getBoundingClientRect();
+        return { x: ((clientX - rect.left) / rect.width) * W, y: ((clientY - rect.top) / rect.height) * H };
+      }
+      function setCompFromPointer(clientX, clientY) {
+        const p = clientToSvgPoint(clientX, clientY);
+        if (!p) return;
+        const projected = projectToTriangle(p.x, p.y);
+        state.comp = state.snapToGrid ? snapComposition(projected, SNAP_STEP) : projected;
+        updateInputsFromComp();
+        render();
+      }
+      function measureTextWidth(text, fontSize, fontWeight) {
+        if (!measureTextWidth.ctx) {
+          measureTextWidth.ctx = document.createElement('canvas').getContext('2d');
+        }
+        measureTextWidth.ctx.font = (fontWeight || 400) + ' ' + fontSize + 'px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif';
+        return measureTextWidth.ctx.measureText(text).width;
+      }
+      function infoBoxLayout() {
+        const pad = 14;
+        const gap = 24;
+        const titleW = measureTextWidth('Composition', 15, 600);
+        const rowAText = state.names.a + ': ' + fmt(state.comp.a);
+        const rowBText = state.names.b + ': ' + fmt(state.comp.b);
+        const rowCText = state.names.c + ': ' + fmt(state.comp.c);
+        const rowAW = measureTextWidth(rowAText, 14, 400);
+        const rowBW = measureTextWidth(rowBText, 14, 400);
+        const rowCW = measureTextWidth(rowCText, 14, 400);
+        const isHorizontal = state.infoBoxOrientation === 'horizontal';
+        const w = isHorizontal
+          ? Math.max(titleW, rowAW + gap + rowBW + gap + rowCW) + pad * 2
+          : Math.max(titleW, rowAW, rowBW, rowCW) + pad * 2;
+        const h = isHorizontal ? 56 : 86;
+        return { w, h, pad, gap, rowAText, rowBText, rowCText, rowAW, rowBW, rowCW };
+      }
+      function infoBoxSize() {
+        const layout = infoBoxLayout();
+        return { w: layout.w, h: layout.h };
+      }
+      function legendSize() { return LEGEND_SIZES[state.legendOrientation] || LEGEND_SIZES.horizontal; }
+      function startInfoBoxDrag(clientX, clientY) {
+        const p = clientToSvgPoint(clientX, clientY);
+        if (!p) return;
+        state.infoBoxDragOffset = { x: p.x - state.infoBoxPos.x, y: p.y - state.infoBoxPos.y };
+        state.draggingInfoBox = true;
+      }
+      function moveInfoBoxDrag(clientX, clientY) {
+        if (!state.draggingInfoBox) return;
+        const p = clientToSvgPoint(clientX, clientY);
+        if (!p) return;
+        const size = infoBoxSize();
+        state.infoBoxPos = {
+          x: clamp(p.x - state.infoBoxDragOffset.x, 0, W - size.w),
+          y: clamp(p.y - state.infoBoxDragOffset.y, 0, H - size.h)
+        };
+        render();
+      }
+      function startLegendDrag(clientX, clientY) {
+        const p = clientToSvgPoint(clientX, clientY);
+        if (!p) return;
+        state.legendDragOffset = { x: p.x - state.legendPos.x, y: p.y - state.legendPos.y };
+        state.draggingLegend = true;
+      }
+      function moveLegendDrag(clientX, clientY) {
+        if (!state.draggingLegend) return;
+        const p = clientToSvgPoint(clientX, clientY);
+        if (!p) return;
+        const size = legendSize();
+        state.legendPos = {
+          x: clamp(p.x - state.legendDragOffset.x, 0, W - size.w),
+          y: clamp(p.y - state.legendDragOffset.y, 0, H - size.h)
+        };
+        render();
+      }
+      function saveCurrent() {
+        const valid = insideConstraints(state.comp, state.bounds);
+        state.history.push({
+          dispersionNr: String(state.nextDispersionNr),
+          timestamp: new Date().toLocaleString(),
+          a: round2(state.comp.a),
+          b: round2(state.comp.b),
+          c: round2(state.comp.c),
+          valid,
+          properties: {}
+        });
+        state.nextDispersionNr += 1;
+        render();
+      }
+      function removeHistoryRow(idx) {
+        state.history.splice(idx, 1);
+        render();
+      }
+      function resetAll() {
+        state.names = { a: 'Solvent 1', b: 'Solvent 2', c: 'Solvent 3' };
+        state.comp = { a: 33.33, b: 33.33, c: 33.34 };
+        state.inputs = { a: '33.33', b: '33.33', c: '33.34' };
+        state.history = [];
+        state.nextDispersionNr = 1;
+        state.infoBoxPos = { ...INFO_BOX_DEFAULT_POS };
+        state.draggingInfoBox = false;
+        state.infoBoxOrientation = 'vertical';
+        state.legendPos = { ...LEGEND_DEFAULT_POS };
+        state.draggingLegend = false;
+        state.legendOrientation = 'horizontal';
+        state.activeTab = 'composition';
+        state.bounds = { aMin: 0, aMax: 100, bMin: 0, bMax: 100, cMin: 0, cMax: 100 };
+        state.snapToGrid = true;
+        state.showSavedPoints = true;
+        state.showCurrentPoint = true;
+        state.importStatus = null;
+        state.importReplace = false;
+        state.propertyColumns = [];
+        state.nextPropertyId = 1;
+        state.nextPropertyOrdinal = 1;
+        state.activePropertyId = null;
+        state.heatmapEnabled = false;
+        state.colorPointsByProperty = true;
+        state.colorScheme = 'blueRed';
+        state.heatmapAuto = true;
+        state.heatmapMin = 0;
+        state.heatmapMax = 100;
+        state.heatmapRadius = HEATMAP_RADIUS;
+        render();
+      }
+      function addPropertyColumn() {
+        const isFirst = state.propertyColumns.length === 0;
+        const name = isFirst ? 'Stability Index' : ('Property ' + state.nextPropertyOrdinal);
+        const id = 'prop' + state.nextPropertyId;
+        state.propertyColumns.push({ id, name });
+        state.nextPropertyId += 1;
+        if (!isFirst) state.nextPropertyOrdinal += 1;
+        if (!state.activePropertyId) state.activePropertyId = id;
+        render();
+      }
+      function removePropertyColumn(id) {
+        state.propertyColumns = state.propertyColumns.filter((col) => col.id !== id);
+        state.history.forEach((row) => { if (row.properties) delete row.properties[id]; });
+        if (state.activePropertyId === id) {
+          state.activePropertyId = state.propertyColumns.length ? state.propertyColumns[0].id : null;
+        }
+        render();
+      }
+      function applyImportedCsv(parsed, replace) {
+        if (replace) {
+          state.history = [];
+          state.propertyColumns = [];
+          state.nextPropertyId = 1;
+          state.nextPropertyOrdinal = 1;
+          state.activePropertyId = null;
+          state.names = {
+            a: parsed.names.a || 'Solvent 1',
+            b: parsed.names.b || 'Solvent 2',
+            c: parsed.names.c || 'Solvent 3'
+          };
+        }
+        const idForName = {};
+        state.propertyColumns.forEach((col) => { idForName[col.name] = col.id; });
+        parsed.propertyNames.forEach((name) => {
+          if (!(name in idForName)) {
+            const isFirst = state.propertyColumns.length === 0;
+            const id = 'prop' + state.nextPropertyId;
+            state.propertyColumns.push({ id, name });
+            state.nextPropertyId += 1;
+            if (!isFirst) state.nextPropertyOrdinal += 1;
+            idForName[name] = id;
+            if (!state.activePropertyId) state.activePropertyId = id;
+          }
+        });
+        let maxImportedNr = 0;
+        parsed.rows.forEach((r) => {
+          const properties = {};
+          Object.keys(r.propertiesByName).forEach((name) => { properties[idForName[name]] = r.propertiesByName[name]; });
+          const valid = insideConstraints({ a: r.a, b: r.b, c: r.c }, state.bounds);
+          state.history.push({
+            dispersionNr: r.dispersionNr || String(state.nextDispersionNr),
+            timestamp: r.timestamp || new Date().toLocaleString(),
+            a: r.a,
+            b: r.b,
+            c: r.c,
+            valid,
+            properties
+          });
+          const nrNum = Number(r.dispersionNr);
+          if (Number.isFinite(nrNum)) maxImportedNr = Math.max(maxImportedNr, nrNum);
+        });
+        state.nextDispersionNr = Math.max(state.nextDispersionNr, maxImportedNr + 1);
+        render();
+      }
+      function importCsvFile(file, replace) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const parsed = parseImportedCsv(String(e.target.result));
+          if (!parsed) {
+            state.importStatus = { cls: 'info-error', text: 'Could not read that file. Expected a CSV exported from this app (or matching its column layout).' };
+            render();
+            return;
+          }
+          applyImportedCsv(parsed, replace);
+          state.importStatus = { cls: 'info-success', text: 'Imported ' + parsed.rows.length + ' composition(s) from "' + file.name + '".' };
+          render();
+        };
+        reader.onerror = () => {
+          state.importStatus = { cls: 'info-error', text: 'Failed to read the selected file.' };
+          render();
+        };
+        reader.readAsText(file);
+      }
+      function buildHeatmapImageDataUrl(points, min, max, radius, scheme) {
+        const RES = 160;
+        const canvas = document.createElement('canvas');
+        canvas.width = RES;
+        canvas.height = RES;
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.createImageData(RES, RES);
+        const range = max - min;
+        for (let py = 0; py < RES; py += 1) {
+          for (let px = 0; px < RES; px += 1) {
+            const x = ((px + 0.5) / RES) * W;
+            const y = ((py + 0.5) / RES) * H;
+            const bc = barycentricFromPoint(x, y);
+            const idx = (py * RES + px) * 4;
+            if (bc.a < -0.01 || bc.b < -0.01 || bc.c < -0.01) {
+              imageData.data[idx + 3] = 0;
+              continue;
+            }
+            const value = idwValue(bc.a * 100, bc.b * 100, bc.c * 100, points, radius);
+            if (value === null) {
+              imageData.data[idx + 3] = 0;
+              continue;
+            }
+            const t = range > 1e-9 ? (value - min) / range : 0.5;
+            const color = heatColor(t, scheme);
+            imageData.data[idx] = color.r;
+            imageData.data[idx + 1] = color.g;
+            imageData.data[idx + 2] = color.b;
+            imageData.data[idx + 3] = 235;
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        return canvas.toDataURL('image/png');
+      }
+      function exportPng() {
+        const svg = document.getElementById('ternary-svg');
+        if (!svg) return;
+        const cloned = svg.cloneNode(true);
+        cloned.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        cloned.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+        const svgText = new XMLSerializer().serializeToString(cloned);
+        const img = new Image();
+        const canvas = document.createElement('canvas');
+        const exportScale = 2;
+        canvas.width = W * exportScale;
+        canvas.height = H * exportScale;
+        const ctx = canvas.getContext('2d');
+        img.onload = function () {
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => { if (blob) download('ternary-diagram.png', blob); }, 'image/png');
+        };
+        img.src = toSvgDataUri(svgText);
+      }
+      function exportCsv() {
+        const valid = insideConstraints(state.comp, state.bounds);
+        const rows = state.history.length ? state.history : [{ dispersionNr: '', timestamp: new Date().toLocaleString(), a: state.comp.a, b: state.comp.b, c: state.comp.c, valid, properties: {} }];
+        download('compositions.csv', new Blob([buildCsv(rows, state.names, state.propertyColumns)], { type: 'text/csv;charset=utf-8' }));
+      }
+      function exportExcel() {
+        const valid = insideConstraints(state.comp, state.bounds);
+        const rows = state.history.length ? state.history : [{ dispersionNr: '', timestamp: new Date().toLocaleString(), a: state.comp.a, b: state.comp.b, c: state.comp.c, valid, properties: {} }];
+        download('compositions.xml', new Blob([buildWorkbookXml(rows, state.names, state.propertyColumns)], { type: 'application/xml' }));
+      }
+      function render() {
+        const app = document.getElementById('app');
+        const valid = insideConstraints(state.comp, state.bounds);
+        const feasible = constraintsFeasible(state.bounds);
+        const allowedPoly = allowedPolygon(state.bounds);
+        const trianglePath = 'M ' + P1.x + ' ' + P1.y + ' L ' + P2.x + ' ' + P2.y + ' L ' + P3.x + ' ' + P3.y + ' Z';
+        const allowedPath = polygonPath(allowedPoly);
+        const point = ternaryToCartesian(state.comp.a, state.comp.b, state.comp.c);
+        const gridLines = [];
+        for (let t = 10; t < 100; t += 10) {
+          gridLines.push({ p1: ternaryToCartesian(t, 100 - t, 0), p2: ternaryToCartesian(t, 0, 100 - t) });
+          gridLines.push({ p1: ternaryToCartesian(100 - t, t, 0), p2: ternaryToCartesian(0, t, 100 - t) });
+          gridLines.push({ p1: ternaryToCartesian(100 - t, 0, t), p2: ternaryToCartesian(0, 100 - t, t) });
+        }
+        const axisTicks = Array.from({ length: 9 }, (_, i) => (i + 1) * 10);
+        const forbiddenRegions = [];
+        if (feasible) {
+          if (state.bounds.aMin > 0) forbiddenRegions.push({ key: 'a', path: polygonPath(polygonForConstraint('a', '<=', state.bounds.aMin)) });
+          if (state.bounds.aMax < 100) forbiddenRegions.push({ key: 'a', path: polygonPath(polygonForConstraint('a', '>=', state.bounds.aMax)) });
+          if (state.bounds.bMin > 0) forbiddenRegions.push({ key: 'b', path: polygonPath(polygonForConstraint('b', '<=', state.bounds.bMin)) });
+          if (state.bounds.bMax < 100) forbiddenRegions.push({ key: 'b', path: polygonPath(polygonForConstraint('b', '>=', state.bounds.bMax)) });
+          if (state.bounds.cMin > 0) forbiddenRegions.push({ key: 'c', path: polygonPath(polygonForConstraint('c', '<=', state.bounds.cMin)) });
+          if (state.bounds.cMax < 100) forbiddenRegions.push({ key: 'c', path: polygonPath(polygonForConstraint('c', '>=', state.bounds.cMax)) });
+        }
+        const activePropertyColumn = state.propertyColumns.find((col) => col.id === state.activePropertyId) || null;
+        const heatPoints = activePropertyValues();
+        const propertyDataReady = !!activePropertyColumn && heatPoints.length >= 1;
+        const heatmapActive = state.heatmapEnabled && propertyDataReady;
+        const dotColorActive = state.colorPointsByProperty && propertyDataReady;
+        const colorScaleActive = heatmapActive || dotColorActive;
+        let heatmapMinValue = state.heatmapMin;
+        let heatmapMaxValue = state.heatmapMax;
+        if (colorScaleActive && state.heatmapAuto) {
+          const vals = heatPoints.map((p) => p.v);
+          heatmapMinValue = Math.min(...vals);
+          heatmapMaxValue = Math.max(...vals);
+        }
+        const heatmapImageUrl = heatmapActive ? buildHeatmapImageDataUrl(heatPoints, heatmapMinValue, heatmapMaxValue, state.heatmapRadius, state.colorScheme) : '';
+        const curLegendSize = legendSize();
+        const curInfoBoxLayout = infoBoxLayout();
+        const curInfoBoxSize = { w: curInfoBoxLayout.w, h: curInfoBoxLayout.h };
+        const ibCol1X = state.infoBoxPos.x + curInfoBoxLayout.pad;
+        const ibCol2X = ibCol1X + curInfoBoxLayout.rowAW + curInfoBoxLayout.gap;
+        const ibCol3X = ibCol2X + curInfoBoxLayout.rowBW + curInfoBoxLayout.gap;
+        const legendContent = state.legendOrientation === 'vertical'
+          ? `<text x="${state.legendPos.x + curLegendSize.w / 2}" y="${state.legendPos.y + 22}" text-anchor="middle" font-size="15" font-weight="600" fill="#0f172a">${esc(activePropertyColumn ? activePropertyColumn.name : '')}</text>
+             <text x="${state.legendPos.x + curLegendSize.w / 2}" y="${state.legendPos.y + 44}" text-anchor="middle" font-size="14" font-weight="bold" fill="#475569">${fmt(heatmapMaxValue)}</text>
+             <rect x="${state.legendPos.x + curLegendSize.w / 2 - 7}" y="${state.legendPos.y + 54}" width="14" height="130" rx="7" fill="url(#legendGradientVertical)" />
+             <text x="${state.legendPos.x + curLegendSize.w / 2}" y="${state.legendPos.y + 200}" text-anchor="middle" font-size="14" font-weight="bold" fill="#475569">${fmt(heatmapMinValue)}</text>`
+          : `<text x="${state.legendPos.x + 10}" y="${state.legendPos.y + 22}" font-size="15" font-weight="600" fill="#0f172a">${esc(activePropertyColumn ? activePropertyColumn.name : '')}</text>
+             <text x="${state.legendPos.x + 10}" y="${state.legendPos.y + 48}" font-size="14" font-weight="bold" fill="#475569">${fmt(heatmapMinValue)}</text>
+             <rect x="${state.legendPos.x + 44}" y="${state.legendPos.y + 39}" width="${curLegendSize.w - 88}" height="10" rx="5" fill="url(#legendGradient)" />
+             <text x="${state.legendPos.x + 44 + (curLegendSize.w - 88) + 8}" y="${state.legendPos.y + 48}" font-size="14" font-weight="bold" fill="#475569">${fmt(heatmapMaxValue)}</text>`;
+        const infoBoxContent = state.infoBoxOrientation === 'horizontal'
+          ? `<text x="${ibCol1X}" y="${state.infoBoxPos.y + 22}" font-size="15" font-weight="600" fill="#0f172a">Composition</text>
+             <text x="${ibCol1X}" y="${state.infoBoxPos.y + 44}" font-size="14" fill="${SOLVENT_COLORS.a}">${esc(curInfoBoxLayout.rowAText)}</text>
+             <text x="${ibCol2X}" y="${state.infoBoxPos.y + 44}" font-size="14" fill="${SOLVENT_COLORS.b}">${esc(curInfoBoxLayout.rowBText)}</text>
+             <text x="${ibCol3X}" y="${state.infoBoxPos.y + 44}" font-size="14" fill="${SOLVENT_COLORS.c}">${esc(curInfoBoxLayout.rowCText)}</text>`
+          : `<text x="${ibCol1X}" y="${state.infoBoxPos.y + 25}" font-size="15" font-weight="600" fill="#0f172a">Composition</text>
+             <text x="${ibCol1X}" y="${state.infoBoxPos.y + 46}" font-size="14" fill="${SOLVENT_COLORS.a}">${esc(curInfoBoxLayout.rowAText)}</text>
+             <text x="${ibCol1X}" y="${state.infoBoxPos.y + 64}" font-size="14" fill="${SOLVENT_COLORS.b}">${esc(curInfoBoxLayout.rowBText)}</text>
+             <text x="${ibCol1X}" y="${state.infoBoxPos.y + 82}" font-size="14" fill="${SOLVENT_COLORS.c}">${esc(curInfoBoxLayout.rowCText)}</text>`;
+        const savedPointSvg = state.showSavedPoints ? state.history.map((row, idx) => {
+          const xy = ternaryToCartesian(row.a, row.b, row.c);
+          let dotColor = POINT_COLORS[idx % POINT_COLORS.length];
+          const labelColor = dotColorActive ? '#000000' : dotColor;
+          if (dotColorActive) {
+            const rowValue = Number(row.properties && row.properties[state.activePropertyId]);
+            if (Number.isFinite(rowValue)) {
+              const range = heatmapMaxValue - heatmapMinValue;
+              const t = range > 1e-9 ? (rowValue - heatmapMinValue) / range : 0.5;
+              const c = heatColor(t, state.colorScheme);
+              dotColor = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+            }
+          }
+          return '<g><circle cx="' + xy.x + '" cy="' + xy.y + '" r="7" fill="' + dotColor + '" stroke="white" stroke-width="2.5" /><text x="' + (xy.x + 10) + '" y="' + (xy.y - 10) + '" font-size="12" font-weight="600" fill="' + labelColor + '">' + esc(row.dispersionNr || String(idx + 1)) + '</text></g>';
+        }).join('') : '';
+        const currentPointSvg = state.showCurrentPoint ? '<g><circle cx="' + point.x + '" cy="' + point.y + '" r="9" fill="' + (valid ? '#0f172a' : '#dc2626') + '" stroke="white" stroke-width="3" /><circle cx="' + point.x + '" cy="' + point.y + '" r="18" fill="transparent" stroke="' + (valid ? 'rgba(15,23,42,0.18)' : 'rgba(220,38,38,0.18)') + '" stroke-width="8" /></g>' : '';
+        const propertiesStatus = !state.propertyColumns.length
+          ? { cls: 'info-neutral', text: 'Add a property column below, then enter values directly in the Saved compositions table.' }
+          : !activePropertyColumn
+            ? { cls: 'info-neutral', text: 'Select a property (radio button) to visualize it as a heatmap and/or color the saved points.' }
+            : heatPoints.length === 0
+              ? { cls: 'info-neutral', text: 'Enter at least one numeric value for "' + activePropertyColumn.name + '" in the table to see it visualized.' }
+              : { cls: 'info-success', text: 'Showing "' + activePropertyColumn.name + '" across ' + heatPoints.length + ' composition(s).' };
+
+        app.innerHTML = `
+          <div class="container">
+            <div class="max-w-7xl space-y-6">
+              <div class="header">
+                <div class="header-content">
+                  <h1>Ternary Solvent Designer</h1>
+                  <p>Interactive 3-component solvent triangle with saved points, constraints, property visualization, and export tools.</p>
+                </div>
+                <div style="display:flex;align-items:center;gap:16px;"><img src="${esc(ZBT_LOGO_SRC)}" alt="ZBT logo" class="logo" /></div>
+                <div class="btn-group">
+                  <button class="btn" id="resetBtn">Reset</button>
+                </div>
+              </div>
+              <div class="grid-2col">
+                <div class="card">
+                  <div class="card-header"><h2>Triangle diagram</h2></div>
+                  <div class="card-content">
+                    <div class="svg-container">
+                      <svg id="ternary-svg" viewBox="0 0 ${W} ${H}">
+                        <defs>
+                          <clipPath id="triangleClip"><path d="${trianglePath}" /></clipPath>
+                          <clipPath id="allowedClip">${allowedPath ? `<path d="${allowedPath}" />` : ''}</clipPath>
+                          <linearGradient id="legendGradient" x1="0%" y1="0%" x2="100%" y2="0%">${svgGradientStops(state.colorScheme)}</linearGradient>
+                          <linearGradient id="legendGradientVertical" x1="0%" y1="100%" x2="0%" y2="0%">${svgGradientStops(state.colorScheme)}</linearGradient>
+                          <style>text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }</style>
+                        </defs>
+                        <rect x="0" y="0" width="${W}" height="${H}" fill="white" rx="24" />
+                        <path d="${trianglePath}" fill="white" stroke="${EDGE_COLOR}" stroke-width="1.8" />
+                        ${forbiddenRegions.map((region) => `<g clip-path="url(#triangleClip)"><path d="${region.path}" fill="${SOLVENT_COLORS[region.key]}" opacity="0.14" /></g>`).join('')}
+                        <g clip-path="url(#allowedClip)">
+                          ${gridLines.map((line) => `<line x1="${line.p1.x}" y1="${line.p1.y}" x2="${line.p2.x}" y2="${line.p2.y}" stroke="#64748b" stroke-width="1.3" />`).join('')}
+                        </g>
+                        ${heatmapImageUrl ? `<image id="heatmapImage" href="${heatmapImageUrl}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" clip-path="url(#allowedClip)" />` : ''}
+                        <line x1="${P2.x}" y1="${P2.y}" x2="${P3.x}" y2="${P3.y}" stroke="${EDGE_COLOR}" stroke-width="2.2" />
+                        <line x1="${P1.x}" y1="${P1.y}" x2="${P2.x}" y2="${P2.y}" stroke="${EDGE_COLOR}" stroke-width="2.2" />
+                        <line x1="${P1.x}" y1="${P1.y}" x2="${P3.x}" y2="${P3.y}" stroke="${EDGE_COLOR}" stroke-width="2.2" />
+                        ${allowedPath ? `<path d="${allowedPath}" fill="none" stroke="rgba(22,163,74,0.75)" stroke-width="2" stroke-dasharray="7 5" />` : ''}
+                        ${axisTicks.map((t) => {
+                          const pa = ternaryToCartesian(t, 100 - t, 0);
+                          const pb = ternaryToCartesian(0, t, 100 - t);
+                          const pc = ternaryToCartesian(100 - t, 0, t);
+                          return `<g>
+                            <text x="${pa.x + AXIS_OFFSETS.a.x}" y="${pa.y + AXIS_OFFSETS.a.y}" text-anchor="middle" font-size="16" font-weight="500" fill="${SOLVENT_COLORS.a}">${fmtAxis(t)}</text>
+                            <text x="${pb.x + AXIS_OFFSETS.b.x}" y="${pb.y + AXIS_OFFSETS.b.y}" text-anchor="start" font-size="16" font-weight="500" fill="${SOLVENT_COLORS.b}">${fmtAxis(t)}</text>
+                            <text x="${pc.x + AXIS_OFFSETS.c.x}" y="${pc.y + AXIS_OFFSETS.c.y}" text-anchor="start" font-size="16" font-weight="500" fill="${SOLVENT_COLORS.c}">${fmtAxis(t)}</text>
+                          </g>`;
+                        }).join('')}
+                        <text x="${P1.x}" y="${P1.y - 28}" text-anchor="middle" font-size="20" font-weight="700" fill="${SOLVENT_COLORS.a}">${esc(state.names.a)}</text>
+                        <text x="${P2.x - 8}" y="${P2.y + 30}" text-anchor="end" font-size="20" font-weight="700" fill="${SOLVENT_COLORS.b}">${esc(state.names.b)}</text>
+                        <text x="${P3.x + 8}" y="${P3.y + 30}" text-anchor="start" font-size="20" font-weight="700" fill="${SOLVENT_COLORS.c}">${esc(state.names.c)}</text>
+                        ${savedPointSvg}
+                        ${currentPointSvg}
+                        <g id="infoBox" style="cursor:move;" touch-action="none">
+                          <rect x="${state.infoBoxPos.x}" y="${state.infoBoxPos.y}" width="${curInfoBoxSize.w}" height="${curInfoBoxSize.h}" rx="14" fill="rgba(255,255,255,0.94)" stroke="#cbd5e1" />
+                          ${infoBoxContent}
+                        </g>
+                        ${colorScaleActive ? `<g id="legend" style="cursor:move;" touch-action="none">
+                          <rect x="${state.legendPos.x}" y="${state.legendPos.y}" width="${curLegendSize.w}" height="${curLegendSize.h}" rx="10" fill="rgba(255,255,255,0.85)" stroke="#e2e8f0" />
+                          ${legendContent}
+                        </g>` : ''}
+                      </svg>
+                    </div>
+                    <div class="legend">
+                      <div class="legend-item"><span class="swatch" style="background:#0f172a"></span>Current point</div>
+                      <div class="legend-item"><span class="swatch" style="background:#22c55e"></span>Constraint region for ${esc(state.names.a)}</div>
+                      <div class="legend-item"><span class="swatch" style="background:#ef4444"></span>Constraint region for ${esc(state.names.b)}</div>
+                      <div class="legend-item"><span class="swatch" style="background:#3b82f6"></span>Constraint region for ${esc(state.names.c)}</div>
+                    </div>
+                    <div class="btn-group-wrap" style="margin-top:16px;">
+                      <button class="btn primary" id="pngBtn">Export diagram PNG</button>
+                      <button class="btn" id="csvBtn">Export CSV</button>
+                      <button class="btn" id="xlsBtn">Export XML</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="space-y-6">
+                  <div class="card">
+                    <div class="card-header"><h2>Controls</h2></div>
+                    <div class="card-content">
+                      <div class="tabs">
+                        <button class="tab-btn ${state.activeTab === 'constraints' ? 'active' : ''}" data-tab="constraints">Label/Constraints</button>
+                        <button class="tab-btn ${state.activeTab === 'composition' ? 'active' : ''}" data-tab="composition">Composition</button>
+                        <button class="tab-btn ${state.activeTab === 'properties' ? 'active' : ''}" data-tab="properties">Properties</button>
+                      </div>
+                      <div class="tab-content ${state.activeTab === 'constraints' ? 'active' : ''}">
+                        <div class="text-muted">Define minimum and maximum allowed percentages. Restricted regions are shaded by solvent color.</div>
+                        ${['a','b','c'].map((key) => `<div class="constraint-group">
+                          <div class="form-group"><label>Label</label><input data-label="${key}" value="${esc(state.names[key])}" /></div>
+                          <div class="constraint-inputs">
+                            <div class="form-group"><label>Minimum</label><input data-bound="${key}Min" value="${esc(String(state.bounds[key + 'Min']))}" /></div>
+                            <div class="form-group"><label>Maximum</label><input data-bound="${key}Max" value="${esc(String(state.bounds[key + 'Max']))}" /></div>
+                          </div>
+                        </div>`).join('')}
+                        <div class="info-box ${feasible ? 'info-neutral' : 'info-error'}">${esc(feasible ? ('Example: max 20 for ' + state.names.a + ' means set Maximum = 20. Minimum 20 for ' + state.names.b + ' means set Minimum = 20.') : 'No feasible region exists with the current bounds. One common cause is that the three minimum values sum above 100.')}</div>
+                      </div>
+                      <div class="tab-content ${state.activeTab === 'composition' ? 'active' : ''}">
+                        <div class="checkbox-row"><input id="snapToGrid" type="checkbox" ${state.snapToGrid ? 'checked' : ''} /><label for="snapToGrid">Snap cursor to ternary grid (${fmtAxis(SNAP_STEP)} steps). Uncheck for free movement.</label></div>
+                        <div class="checkbox-row"><input id="showCurrentPoint" type="checkbox" ${state.showCurrentPoint ? 'checked' : ''} /><label for="showCurrentPoint">Show current point</label></div>
+                        <div class="checkbox-row"><input id="showSavedPoints" type="checkbox" ${state.showSavedPoints ? 'checked' : ''} /><label for="showSavedPoints">Show saved points simultaneously</label></div>
+                        <div class="form-group">
+                          <label>Composition box layout</label>
+                          <div class="btn-group">
+                            <button class="btn ${state.infoBoxOrientation === 'vertical' ? 'primary' : ''}" type="button" data-infobox-orientation="vertical">Vertical</button>
+                            <button class="btn ${state.infoBoxOrientation === 'horizontal' ? 'primary' : ''}" type="button" data-infobox-orientation="horizontal">Horizontal</button>
+                          </div>
+                        </div>
+                        <div class="text-muted">Click or drag inside the triangle, or enter percentages here. Values normalize to 100 automatically. Press <span class="kbd">Enter</span> to apply.</div>
+                        <div class="form-group"><label>${esc(state.names.a)}</label><input id="input-a" value="${esc(state.inputs.a)}" /></div>
+                        <div class="form-group"><label>${esc(state.names.b)}</label><input id="input-b" value="${esc(state.inputs.b)}" /></div>
+                        <div class="form-group"><label>${esc(state.names.c)}</label><input id="input-c" value="${esc(state.inputs.c)}" /></div>
+                        <button class="btn primary" style="width:100%;" id="saveBtn">Save composition</button>
+                        <div class="info-box ${!feasible ? 'info-error' : valid ? 'info-success' : 'info-error'}" style="margin-top:16px;">${esc(!feasible ? 'The active constraints are mutually impossible. Adjust min/max values until an allowed region exists.' : valid ? 'Current composition is inside the allowed region.' : 'Current composition violates at least one active boundary condition.')}</div>
+                      </div>
+                      <div class="tab-content ${state.activeTab === 'properties' ? 'active' : ''}">
+                        <div class="text-muted">Add measured properties per composition. Enter values directly in the Saved compositions table, then pick one below to visualize as a heatmap on the triangle.</div>
+                        ${state.propertyColumns.map((col) => `<div class="constraint-group">
+                          <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;">
+                            <input type="radio" name="activeProperty" data-active-property="${col.id}" ${state.activePropertyId === col.id ? 'checked' : ''} title="Show as heatmap" />
+                            <input data-property-name="${col.id}" value="${esc(col.name)}" />
+                            <button class="btn" type="button" data-remove-property="${col.id}">Remove</button>
+                          </div>
+                        </div>`).join('')}
+                        <button class="btn" type="button" id="addPropertyBtn">+ Add property column</button>
+                        <div class="separator"></div>
+                        <div class="checkbox-row"><input id="heatmapEnabled" type="checkbox" ${state.heatmapEnabled ? 'checked' : ''} /><label for="heatmapEnabled">Show heatmap on triangle</label></div>
+                        <div class="checkbox-row"><input id="colorPointsByProperty" type="checkbox" ${state.colorPointsByProperty ? 'checked' : ''} /><label for="colorPointsByProperty">Color saved points by property value (dot labels shown in black)</label></div>
+                        <div class="form-group">
+                          <label for="colorScheme">Color scale</label>
+                          <select id="colorScheme">
+                            ${Object.keys(COLOR_SCHEMES).map((key) => `<option value="${key}" ${state.colorScheme === key ? 'selected' : ''}>${esc(COLOR_SCHEMES[key].label)}</option>`).join('')}
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label>Color scale legend layout (drag it on the triangle to reposition)</label>
+                          <div class="btn-group">
+                            <button class="btn ${state.legendOrientation === 'horizontal' ? 'primary' : ''}" type="button" data-legend-orientation="horizontal">Horizontal</button>
+                            <button class="btn ${state.legendOrientation === 'vertical' ? 'primary' : ''}" type="button" data-legend-orientation="vertical">Vertical</button>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="heatmapRadius" id="heatmapRadiusLabel">Influence radius: ${state.heatmapRadius} (10 = one ternary grid step)</label>
+                          <input type="range" id="heatmapRadius" min="1" max="50" step="1" value="${state.heatmapRadius}" />
+                        </div>
+                        <div class="checkbox-row"><input id="heatmapAuto" type="checkbox" ${state.heatmapAuto ? 'checked' : ''} /><label for="heatmapAuto">Auto range from data (lowest = start of scale, highest = end of scale)</label></div>
+                        <div class="constraint-inputs">
+                          <div class="form-group"><label>Min (low end)</label><input id="heatmapMin" ${state.heatmapAuto ? 'disabled' : ''} value="${esc(state.heatmapAuto ? fmt(heatmapMinValue) : String(state.heatmapMin))}" /></div>
+                          <div class="form-group"><label>Max (high end)</label><input id="heatmapMax" ${state.heatmapAuto ? 'disabled' : ''} value="${esc(state.heatmapAuto ? fmt(heatmapMaxValue) : String(state.heatmapMax))}" /></div>
+                        </div>
+                        <div class="info-box ${propertiesStatus.cls}">${esc(propertiesStatus.text)}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header"><h2>Saved compositions</h2></div>
+                    <div class="card-content">
+                      <div class="table-wrapper">
+                        <table>
+                          <thead><tr><th>Dispersion Nr.</th><th>${esc(state.names.a)}</th><th>${esc(state.names.b)}</th><th>${esc(state.names.c)}</th><th>Valid</th>${state.propertyColumns.map((col) => `<th>${esc(col.name)}</th>`).join('')}<th>Time</th><th></th></tr></thead>
+                          <tbody>
+                            ${(state.history.length ? state.history : [{ dispersionNr: '', timestamp: 'Current', a: state.comp.a, b: state.comp.b, c: state.comp.c, valid, properties: {} }]).map((row, idx) => `<tr>
+                              <td>${state.history.length ? `<input class="table-input" data-dispersion-index="${idx}" value="${esc(row.dispersionNr ?? '')}" />` : esc(row.dispersionNr)}</td>
+                              <td>${fmt(row.a)}</td>
+                              <td>${fmt(row.b)}</td>
+                              <td>${fmt(row.c)}</td>
+                              <td>${row.valid ? 'Yes' : 'No'}</td>
+                              ${state.propertyColumns.map((col) => `<td>${state.history.length ? `<input class="table-input" data-property-row="${idx}" data-property-col="${col.id}" value="${esc((row.properties && row.properties[col.id]) ?? '')}" />` : ''}</td>`).join('')}
+                              <td>${esc(row.timestamp)}</td>
+                              <td>${state.history.length ? `<button class="btn" type="button" data-remove-history="${idx}" title="Delete this row">Delete</button>` : ''}</td>
+                            </tr>`).join('')}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="separator"></div>
+                      <div class="text-muted">Saved rows are exported to CSV or Excel. Dispersion Nr. remains editable and saved points can be shown simultaneously on the triangle.</div>
+                      <div class="checkbox-row"><input id="importReplace" type="checkbox" ${state.importReplace ? 'checked' : ''} /><label for="importReplace">Replace existing table instead of appending</label></div>
+                      <div class="btn-group-wrap">
+                        <input type="file" id="importCsvInput" accept=".csv,text/csv" style="display:none;" />
+                        <button class="btn" id="importCsvBtn" type="button">Import CSV</button>
+                      </div>
+                      ${state.importStatus ? `<div class="info-box ${state.importStatus.cls}" style="margin-top:12px;">${esc(state.importStatus.text)}</div>` : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+                    <div style="text-align:center;margin-top:20px;font-size:12px;color:#64748b;">
+            © Copyright ZBT GmbH 2026
+          </div>
+        </div>`;
+
+        document.getElementById('resetBtn').addEventListener('click', resetAll);
+        document.getElementById('saveBtn').addEventListener('click', saveCurrent);
+        document.getElementById('pngBtn').addEventListener('click', exportPng);
+        document.getElementById('csvBtn').addEventListener('click', exportCsv);
+        document.getElementById('xlsBtn').addEventListener('click', exportExcel);
+        document.getElementById('importReplace').addEventListener('change', (e) => { state.importReplace = e.target.checked; });
+        const importCsvInput = document.getElementById('importCsvInput');
+        document.getElementById('importCsvBtn').addEventListener('click', () => importCsvInput.click());
+        importCsvInput.addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (file) importCsvFile(file, state.importReplace);
+          e.target.value = '';
+        });
+
+        document.querySelectorAll('.tab-btn').forEach((btn) => btn.addEventListener('click', () => { state.activeTab = btn.dataset.tab; render(); }));
+        document.getElementById('snapToGrid').addEventListener('change', (e) => {
+          state.snapToGrid = e.target.checked;
+          if (state.snapToGrid) {
+            state.comp = snapComposition(state.comp, SNAP_STEP);
+            updateInputsFromComp();
+          }
+          render();
+        });
+        document.getElementById('showCurrentPoint').addEventListener('change', (e) => { state.showCurrentPoint = e.target.checked; render(); });
+        document.getElementById('showSavedPoints').addEventListener('change', (e) => { state.showSavedPoints = e.target.checked; render(); });
+        document.querySelectorAll('[data-infobox-orientation]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.infoBoxOrientation = btn.dataset.infoboxOrientation;
+            const size = infoBoxSize();
+            state.infoBoxPos = { x: clamp(state.infoBoxPos.x, 0, W - size.w), y: clamp(state.infoBoxPos.y, 0, H - size.h) };
+            render();
+          });
+        });
+
+        ['a', 'b', 'c'].forEach((key) => {
+          const input = document.getElementById('input-' + key);
+          input.addEventListener('input', (e) => { state.inputs[key] = e.target.value; });
+          input.addEventListener('blur', commitComposition);
+          input.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitComposition(); });
+        });
+
+        document.querySelectorAll('[data-bound]').forEach((input) => {
+          input.addEventListener('input', (e) => {
+            state.bounds[e.target.dataset.bound] = clamp(Number(e.target.value) || 0, 0, 100);
+          });
+          input.addEventListener('blur', render);
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              render();
+            }
+          });
+        });
+        document.querySelectorAll('[data-label]').forEach((input) => {
+          input.addEventListener('input', (e) => {
+            const key = e.target.dataset.label;
+            state.names[key] = e.target.value || ('Solvent ' + (key === 'a' ? '1' : key === 'b' ? '2' : '3'));
+          });
+          input.addEventListener('blur', render);
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              render();
+            }
+          });
+        });
+        document.querySelectorAll('[data-dispersion-index]').forEach((input) => {
+          input.addEventListener('input', (e) => {
+            const idx = Number(e.target.dataset.dispersionIndex);
+            if (!Number.isNaN(idx) && state.history[idx]) {
+              state.history[idx].dispersionNr = e.target.value;
+            }
+          });
+        });
+        document.querySelectorAll('[data-remove-history]').forEach((btn) => {
+          btn.addEventListener('click', () => removeHistoryRow(Number(btn.dataset.removeHistory)));
+        });
+        document.querySelectorAll('[data-property-row]').forEach((input) => {
+          const idx = Number(input.dataset.propertyRow);
+          const colId = input.dataset.propertyCol;
+          input.addEventListener('input', (e) => {
+            if (!Number.isNaN(idx) && state.history[idx]) {
+              if (!state.history[idx].properties) state.history[idx].properties = {};
+              state.history[idx].properties[colId] = e.target.value;
+            }
+          });
+          input.addEventListener('blur', render);
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              render();
+            }
+          });
+        });
+
+        const addPropertyBtn = document.getElementById('addPropertyBtn');
+        if (addPropertyBtn) addPropertyBtn.addEventListener('click', addPropertyColumn);
+        document.querySelectorAll('[data-remove-property]').forEach((btn) => {
+          btn.addEventListener('click', () => removePropertyColumn(btn.dataset.removeProperty));
+        });
+        document.querySelectorAll('[data-active-property]').forEach((input) => {
+          input.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              state.activePropertyId = e.target.dataset.activeProperty;
+              render();
+            }
+          });
+        });
+        document.querySelectorAll('[data-property-name]').forEach((input) => {
+          input.addEventListener('input', (e) => {
+            const col = state.propertyColumns.find((c) => c.id === e.target.dataset.propertyName);
+            if (col) col.name = e.target.value || col.name;
+          });
+          input.addEventListener('blur', render);
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              render();
+            }
+          });
+        });
+        const heatmapEnabledInput = document.getElementById('heatmapEnabled');
+        if (heatmapEnabledInput) heatmapEnabledInput.addEventListener('change', (e) => { state.heatmapEnabled = e.target.checked; render(); });
+        const colorPointsByPropertyInput = document.getElementById('colorPointsByProperty');
+        if (colorPointsByPropertyInput) colorPointsByPropertyInput.addEventListener('change', (e) => { state.colorPointsByProperty = e.target.checked; render(); });
+        const colorSchemeInput = document.getElementById('colorScheme');
+        if (colorSchemeInput) colorSchemeInput.addEventListener('change', (e) => { state.colorScheme = e.target.value; render(); });
+        document.querySelectorAll('[data-legend-orientation]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.legendOrientation = btn.dataset.legendOrientation;
+            const size = legendSize();
+            state.legendPos = { x: clamp(state.legendPos.x, 0, W - size.w), y: clamp(state.legendPos.y, 0, H - size.h) };
+            render();
+          });
+        });
+        const heatmapRadiusInput = document.getElementById('heatmapRadius');
+        const heatmapRadiusLabel = document.getElementById('heatmapRadiusLabel');
+        if (heatmapRadiusInput) {
+          heatmapRadiusInput.addEventListener('input', (e) => {
+            state.heatmapRadius = Number(e.target.value) || HEATMAP_RADIUS;
+            if (heatmapRadiusLabel) heatmapRadiusLabel.textContent = 'Influence radius: ' + state.heatmapRadius + ' (10 = one ternary grid step)';
+            if (heatmapActive) {
+              const img = document.getElementById('heatmapImage');
+              if (img) img.setAttribute('href', buildHeatmapImageDataUrl(heatPoints, heatmapMinValue, heatmapMaxValue, state.heatmapRadius, state.colorScheme));
+            }
+          });
+          heatmapRadiusInput.addEventListener('change', render);
+        }
+        const heatmapAutoInput = document.getElementById('heatmapAuto');
+        if (heatmapAutoInput) heatmapAutoInput.addEventListener('change', (e) => {
+          if (state.heatmapAuto && !e.target.checked && heatPoints.length) {
+            state.heatmapMin = heatmapMinValue;
+            state.heatmapMax = heatmapMaxValue;
+          }
+          state.heatmapAuto = e.target.checked;
+          render();
+        });
+        ['heatmapMin', 'heatmapMax'].forEach((id) => {
+          const input = document.getElementById(id);
+          if (!input) return;
+          input.addEventListener('input', (e) => { state[id] = Number(e.target.value) || 0; });
+          input.addEventListener('blur', render);
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              render();
+            }
+          });
+        });
+
+        const svg = document.getElementById('ternary-svg');
+        svg.addEventListener('pointerdown', (e) => { state.dragging = true; setCompFromPointer(e.clientX, e.clientY); });
+        svg.addEventListener('pointermove', (e) => { if (state.dragging) setCompFromPointer(e.clientX, e.clientY); });
+
+        document.getElementById('infoBox').addEventListener('pointerdown', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          startInfoBoxDrag(e.clientX, e.clientY);
+        });
+        const legendEl = document.getElementById('legend');
+        if (legendEl) {
+          legendEl.addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            startLegendDrag(e.clientX, e.clientY);
+          });
+        }
+      }
+
+      window.addEventListener('pointermove', (e) => {
+        if (state.draggingInfoBox) moveInfoBoxDrag(e.clientX, e.clientY);
+        if (state.draggingLegend) moveLegendDrag(e.clientX, e.clientY);
+      });
+      window.addEventListener('pointerup', () => { state.dragging = false; state.draggingInfoBox = false; state.draggingLegend = false; });
+      runSelfTests();
+      updateInputsFromComp();
+      render();
+    })();
+  </script>
+</body>
+</html>
