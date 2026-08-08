@@ -6,6 +6,14 @@ Ternary Solvent Designer
 
  Single HTML file, no installation — just open ZBTriangle.html in a browser.
 
+ Usage
+1. Name the three solvents and set constraints in the Label/Constraints tab.
+2. Set a composition (click the triangle or type values) and click Save composition.
+3. Repeat to build up a series of compositions.
+4. Optionally add property columns and enable a heatmap or point-coloring visualization. The scale is relative by default. If multiple sets have to be compared, its recommended to adjust the scale. (Note: the heatmap is a visualization, not a model.)
+5. Export the diagram/table as graph or table.
+6. Import a previously saved CSV to continue a session.
+
 Features
 - Interactive triangle diagram: set composition by clicking/dragging, or by typing values (auto-normalized to 100%)
 - Optional snap-to-grid (default 10% steps)
@@ -19,13 +27,6 @@ Features
 - Import: reload a previously exported CSV, either appended to or replacing the current table
 - Reset button restores all defaults
 
-Usage
-1. Name the three solvents and set constraints in the Label/Constraints tab.
-2. Set a composition (click the triangle or type values) and click Save composition.
-3. Repeat to build up a series of compositions.
-4. Optionally add property columns and enable a heatmap or point-coloring visualization.
-5. Export the diagram/table, or import a previously saved CSV to continue a session.
-
 Notes
 - All compositions are normalized so the three components sum to 100.
 - Validity (Yes/No) is checked live against the current constraints.
@@ -35,7 +36,14 @@ Notes
 
 Ternary Solvent Designer
 
-Interaktives Browser-Tool zur Auslegung und Dokumentation von 3-Komponenten-Lösungsmittelzusammensetzungen anhand eines Dreiecksdiagramms. Einzelne HTML-Datei, keine Installation nötig — ZBTriangle.html einfach im Browser öffnen.
+Interaktives Browser-Tool zur Auslegung und Dokumentation von 3-Komponenten-Lösungsmittelzusammensetzungen anhand eines Dreiecksdiagramms — ZBTriangle.html einfach im Browser öffnen.
+
+Empfohlener Workflow
+1. Lösungsmittel benennen und Randbedingungen im Tab Label/Constraints festlegen.
+2. Zusammensetzung einstellen und mit Save composition speichern.
+3. Für eine Screening-Serie wiederholen.
+4. Optional: Eigenschaftsspalten anlegen und per Heatmap oder Punktfärbung visualisieren. Ggf. die Skala definieren. 
+5. Ergebnisse exportieren oder eine zuvor gespeicherte CSV-Datei zum Fortsetzen importieren.
 
 Typische Anwendung
 - Entwicklung von Katalysator- und Ionomer-/Bindertinten
@@ -56,12 +64,6 @@ Funktionen
 - Import: zuvor exportierte CSV-Datei wieder einlesen, wahlweise angehängt an oder anstelle der aktuellen Tabelle
 - Reset-Button setzt alle Einstellungen zurück
 
-Empfohlener Workflow
-1. Lösungsmittel benennen und Randbedingungen im Tab Label/Constraints festlegen.
-2. Zusammensetzung einstellen und mit Save composition speichern.
-3. Für eine Screening-Serie wiederholen.
-4. Optional: Eigenschaftsspalten anlegen und per Heatmap oder Punktfärbung visualisieren.
-5. Ergebnisse exportieren oder eine zuvor gespeicherte CSV-Datei zum Fortsetzen importieren.
 
 Hinweise
 - Das Tool bewertet keine Elektrodenperformance direkt und ersetzt keine Rheologie-, Stabilitäts- oder Beschichtungsprüfung — es dient als Planungs-, Visualisierungs- und Dokumentationswerkzeug.
